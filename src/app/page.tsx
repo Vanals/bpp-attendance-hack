@@ -8,7 +8,7 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('/api/read-students-attendance-2');
+        const response = await axios.get('/api/read-students-attendance');
 
         if (response.status !== 200) {
           throw new Error(`Request failed with status: ${response.status}`);

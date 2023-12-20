@@ -1,22 +1,34 @@
-import { read } from 'fs';
-import fs from 'fs/promises';
-import path from 'path';
+import AWS from 'aws-sdk';
 
-const dataFilePath = path.resolve('./src/data/attendance.json');
+AWS.config.update({
+    region: 'us-west-2', // Set your preferred AWS region
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID, // Your AWS Access Key ID
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, // Your AWS Secret Access Key
+    sessionToken: process.env.AWS_SESSION_TOKEN, // Session token if using temporary credentials (optional)
+    httpOptions: {
+      timeout: 10000, // Timeout in milliseconds (default is 120000)
+      connectTimeout: 5000 // Connection timeout in milliseconds (optional)
+    },
+    logger: process.stdout // Logger for logging information about requests (optional)
+  });
+
+const s3 = new AWS.S3();
+const s3BucketName = 'bpp-students-attendance'
+const DATA_FILE_PATH = 'attendance.json';
 
 async function readAttendanceData() {
   try {
-    // Read data from the JSON file
-    const fileData = await fs.readFile(dataFilePath, 'utf-8');
-    console.log(fileData, '🥶🥶🥶🥶')
-    const attendanceData = JSON.parse(fileData);
+    // Retrieve data from the S3 bucket
+    const params = {
+      Bucket: s3BucketName,
+      Key: DATA_FILE_PATH,
+    };
 
-    // Log or use the attendance data as needed
-    console.log(attendanceData);
+    const response = await s3.getObject(params).promise();
+    const attendanceData = JSON.parse(response.Body.toString('utf-8'));
 
     return attendanceData;
   } catch (error) {
-    // Handle errors, such as file not found or JSON parsing error
     console.error('Error reading attendance data:', error.message);
     return null;
   }
@@ -24,18 +36,23 @@ async function readAttendanceData() {
 
 async function writeAttendanceData(attendanceData) {
   try {
-    // Write the updated data back to the JSON file
-    await fs.writeFile(dataFilePath, JSON.stringify(attendanceData, null, 2), 'utf-8');
+    // Write the updated data back to the S3 bucket
+    const params = {
+      Bucket: s3BucketName,
+      Key: DATA_FILE_PATH,
+      Body: JSON.stringify(attendanceData, null, 2),
+      ContentType: 'application/json',
+    };
+
+    await s3.putObject(params).promise();
   } catch (error) {
-    // Handle errors, such as file not found or write error
     console.error('Error writing attendance data:', error.message);
   }
 }
 
-
 async function addAttendanceRecord(studentId, classId, timestamp) {
   try {
-    // Read existing data from the JSON file
+    // Read existing data from the S3 bucket
     const attendanceData = await readAttendanceData();
 
     // Find the array for the specified student ID or create a new one
@@ -52,7 +69,7 @@ async function addAttendanceRecord(studentId, classId, timestamp) {
     // Update the attendance data with the new record
     attendanceData[studentId] = studentArray;
 
-    // Write the updated data back to the JSON file
+    // Write the updated data back to the S3 bucket
     await writeAttendanceData(attendanceData);
 
     console.log('Attendance record added successfully:', newAttendanceRecord);
@@ -62,7 +79,6 @@ async function addAttendanceRecord(studentId, classId, timestamp) {
 }
 
 export default async function handler(req, res) {
-  console.log('🔥🔥🔥🔥🔥🔥🔥')
   if (req.method === 'POST') {
     try {
       const { student_id, class_id } = req.body;
