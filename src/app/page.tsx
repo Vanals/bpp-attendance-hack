@@ -57,6 +57,7 @@ export default function Home() {
             const attendanceRecords = Array.isArray(records) ? records : [];
 
             // Check if there is any record for today
+            // @ts-ignore
             const hasRecordForToday = attendanceRecords.some((record) => isToday(record.timestamp));
 
             return (
@@ -82,5 +83,5 @@ export default function Home() {
   );
 }
 
-// Now, mark the component as a client component
-export const useClient = true;
+// // Now, mark the component as a client component
+// export const useClient = true;
