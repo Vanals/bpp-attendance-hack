@@ -40,18 +40,24 @@ export default function Home() {
   };
 
   return (
-    <div>
+    <div style={{
+      height: '2000px',
+      marginLeft: '50px',
+      marginTop: '50px'
+    }}>
       <h1>Students Attendance Data</h1>
-      <br/>
-      <br/>
-      
+      <br />
+      <br />
+
       <table>
         <thead>
           <tr>
             <th>Student ID</th>
+            <br/>
             <th>Status</th>
           </tr>
         </thead>
+        <br/>
         <tbody>
           {Object.entries(data).map(([studentId, records]) => {
             const attendanceRecords = Array.isArray(records) ? records : [];
@@ -63,6 +69,8 @@ export default function Home() {
             return (
               <tr key={studentId}>
                 <td>{studentId}</td>
+                <br/>
+
                 <td>
                   {/* Display a green or red circle based on the condition */}
                   <div
@@ -82,6 +90,3 @@ export default function Home() {
     </div>
   );
 }
-
-// // Now, mark the component as a client component
-// export const useClient = true;
