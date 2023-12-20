@@ -1,20 +1,27 @@
 import AWS from 'aws-sdk';
 
 AWS.config.update({
-  accessKeyId: process.env.vAWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: 'eu-west-2', // e.g., 'us-east-1'
-});
+    region: 'us-west-2', // Set your preferred AWS region
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID, // Your AWS Access Key ID
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, // Your AWS Secret Access Key
+    sessionToken: process.env.AWS_SESSION_TOKEN, // Session token if using temporary credentials (optional)
+    httpOptions: {
+      timeout: 10000, // Timeout in milliseconds (default is 120000)
+      connectTimeout: 5000 // Connection timeout in milliseconds (optional)
+    },
+    logger: process.stdout // Logger for logging information about requests (optional)
+  });
 
 const s3 = new AWS.S3();
 const s3BucketName = 'bpp-students-attendance'
+const DATA_FILE_PATH = 'attendance.json';
 
 async function readAttendanceData() {
   try {
     // Retrieve data from the S3 bucket
     const params = {
       Bucket: s3BucketName,
-      Key: 'path/to/your/data.json',
+      Key: DATA_FILE_PATH,
     };
 
     const response = await s3.getObject(params).promise();
@@ -32,7 +39,7 @@ async function writeAttendanceData(attendanceData) {
     // Write the updated data back to the S3 bucket
     const params = {
       Bucket: s3BucketName,
-      Key: 'path/to/your/data.json',
+      Key: DATA_FILE_PATH,
       Body: JSON.stringify(attendanceData, null, 2),
       ContentType: 'application/json',
     };
