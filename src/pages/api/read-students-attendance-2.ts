@@ -1,10 +1,17 @@
 import AWS from 'aws-sdk';
 
 AWS.config.update({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: 'eu-west-2', // e.g., 'us-east-1'
-});
+    region: 'us-west-2', // Set your preferred AWS region
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID, // Your AWS Access Key ID
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, // Your AWS Secret Access Key
+    sessionToken: process.env.AWS_SESSION_TOKEN, // Session token if using temporary credentials (optional)
+    httpOptions: {
+      timeout: 10000, // Timeout in milliseconds (default is 120000)
+      connectTimeout: 5000 // Connection timeout in milliseconds (optional)
+    },
+    logger: process.stdout // Logger for logging information about requests (optional)
+  });
+  
 
 const s3 = new AWS.S3();
 const BUCKET_NAME = 'bpp-students-attendance';
@@ -38,8 +45,6 @@ export default async function handler(req, res) {
             if (!attendanceData) {
                 return res.status(500).json({ error: 'Error reading attendance data' });
             }
-
-            console.log(attendanceData, '✅✅');
 
             return res.status(200).json({ data: attendanceData });
         } catch (error) {
