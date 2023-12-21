@@ -9,7 +9,7 @@ AWS.config.update({
       timeout: 10000, // Timeout in milliseconds (default is 120000)
       connectTimeout: 5000 // Connection timeout in milliseconds (optional)
     },
-    logger: process.stdout // Logger for logging information about requests (optional).
+    logger: process.stdout // Logger for logging information about requests (optional)
   });
   
 
